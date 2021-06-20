@@ -1,4 +1,4 @@
-import { createStore } from 'vuex' // new store() 函数式API
+import { createStore } from '@/vuex' // new store() 函数式API
 
 export default createStore({
   state: { // 组件中的data
