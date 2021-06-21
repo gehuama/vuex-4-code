@@ -11,11 +11,15 @@
   <button @click="$store.state.count++">错误修改</button>
   <button @click="add">同步修改</button>
   <button @click="asyncAdd">异步修改</button> 
+  <div>a 模块：{{aCount}}</div>
+  <div>b 模块：{{bCount}}</div>
+  <button @click="aAdd">a同步修改</button>
+  <button @click="bAdd">b同步修改</button> 
 </template>
 
 <script>
 import {computed} from 'vue';
-import {useStore} from "@/vuex";
+import {useStore} from "vuex";
 export default {
   name: 'App',
   setup(){
@@ -28,13 +32,23 @@ export default {
       store.dispatch('asyncAdd', 1)
     };
     console.log(store);
+    const aAdd = ()=>{
+      store.commit('aCount/add', 1)
+    };
+    const bAdd = ()=>{
+      store.commit('bCount/add', 1)
+    };
     return{
       count: computed(()=>
         store.state.count
       ),
       double: computed(()=>store.getters.double),
+      aCount: computed(()=>store.state.aCount.count),
+      bCount: computed(()=>store.state.bCount.count),
       add,
-      asyncAdd
+      asyncAdd,
+      aAdd,
+      bAdd
     }
   }
 }

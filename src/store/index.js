@@ -1,4 +1,4 @@
-import { createStore } from '@/vuex' // new store() 函数式API
+import { createStore } from 'vuex' // new store() 函数式API
 
 export default createStore({
   state: { // 组件中的data
@@ -21,8 +21,26 @@ export default createStore({
       },1000)
     }
   },
-  // modules: {
-  // }
+  modules: { // 子模块 实现逻辑拆分
+    aCount:{
+      namespaced : true,
+      state:{count: 1 },
+      mutations: { // 可以更改状态 必须是同步更改的
+        add(state, payload){
+          state.count += payload
+        }
+      },
+    },
+    bCount:{
+      namespaced : true,
+      state:{count: 2 },
+      mutations: { // 可以更改状态 必须是同步更改的
+        add(state, payload){
+          state.count += payload
+        }
+      },
+    }
+  }
 })
 
 // 严格模式
