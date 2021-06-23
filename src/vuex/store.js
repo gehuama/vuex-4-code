@@ -1,4 +1,4 @@
-import { reactive } from "vue"
+import { reactive, watch } from "vue"
 import { isPromise, forEachValue } from "./utils";
 import { storeKey } from "./inject-key";
 import ModuleCollection from "./module/module-collection";
@@ -60,9 +60,23 @@ function resetStoreState(store, state) {
             enumerable: true
         })
     })
+    if(store.strict){
+        enableStrictMode(store);
+    }
 }
-
+function enableStrictMode(store){
+    watch(()=>store._state.data, ()=>{ // 监控数据变化，数据变化后执行回调函数 effect
+        // 如果断言为false，则将一个错误消息写入控制台。如果断言是 true，没有任何反应。
+        console.assert(store._committing, 'do not mutate vuex store state outside mutation handlers');
+    }, {deep:true,flush:'sync'}); // 默认watchApi是异步的，这里改成同步的监控
+}
 export default class Store {
+    _withCommit(fn) { // 切片
+        const committing = this._committing;
+        this._committing = true;
+        fn();
+        this._committing = committing;
+    }
     constructor(options) {
         // {state,actions,mutations,getter,modules} // store.modules.aCount.state
         const store = this;
@@ -72,6 +86,14 @@ export default class Store {
         store._wrappedGetters = Object.create(null);
         store._mutations = Object.create(null);
         store._actions = Object.create(null);
+        this.strict = options.strict || false;
+
+        // 调用的时候 知道是mutation,mutation里面得写是同步
+        this._committing = false;
+        // 在mutation之前添加一个状态 _committing = true;
+        // 调用mutation-> 会更改状态，我们就监控这个状态 如果当前状态变化的时:
+        // _committing = true; 同步更改 
+        // _committing = false; 异步更改
 
         // 定义状态
         const state = store._modules.root.state; // 跟状态
@@ -87,7 +109,10 @@ export default class Store {
     }
     commit = (type, payload) => {
         const entry = this._mutations[type] || [];
-        entry.forEach(handler => handler(payload));
+        this._withCommit(()=>{
+            entry.forEach(handler => handler(payload));
+        })
+        
     }
     dispatch = (type, payload) => {
         const entry = this._actions[type] || [];

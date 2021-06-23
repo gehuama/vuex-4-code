@@ -1,6 +1,7 @@
 import { createStore } from '@/vuex' // new store() 函数式API
 
 export default createStore({
+  strict: true, // 开启严格模式 不用许用户非法操作状态 （只能在mutation中修改状态，否则就会发生异常）
   state: { // 组件中的data
     count: 0
   },
