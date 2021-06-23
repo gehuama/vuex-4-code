@@ -13,8 +13,10 @@
   <button @click="asyncAdd">异步修改</button> 
   <div>a 模块：{{aCount}}</div>
   <div>b 模块：{{bCount}}</div>
+  <div>c 模块：{{cCount}}</div>
   <button @click="aAdd">a同步修改</button>
   <button @click="bAdd">b同步修改</button> 
+  <button @click="cAdd">c同步修改</button> 
 </template>
 
 <script>
@@ -33,22 +35,27 @@ export default {
         alert("ok")
       })
     };
-    // console.log(store);
-    // const aAdd = ()=>{
-    //   store.commit('aCount/add', 1)
-    // };
-    // const bAdd = ()=>{
-    //   store.commit('bCount/add', 1)
-    // };
+    console.log(store);
+    const aAdd = ()=>{
+      store.commit('aCount/add', 1)
+    };
+    const bAdd = ()=>{
+      store.commit('bCount/add', 1)
+    };
+    const cAdd = ()=>{
+      store.commit('aCount/cCount/add', 1)
+    };
     return{
       count: computed(()=>store.state.count),
       double: computed(()=>store.getters.double),
       aCount: computed(()=>store.state.aCount.count),
       bCount: computed(()=>store.state.bCount.count),
+      cCount: computed(()=>store.state.aCount.cCount.count),
       add,
       asyncAdd,
-      // aAdd,
-      // bAdd
+      aAdd,
+      bAdd,
+      cAdd
     }
   }
 }
