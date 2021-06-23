@@ -29,15 +29,17 @@ export default {
       store.commit('add', 1)
     };
     const asyncAdd = ()=>{
-      store.dispatch('asyncAdd', 1)
+      store.dispatch('asyncAdd', 1).then(()=>{
+        alert("ok")
+      })
     };
-    console.log(store);
-    const aAdd = ()=>{
-      store.commit('aCount/add', 1)
-    };
-    const bAdd = ()=>{
-      store.commit('bCount/add', 1)
-    };
+    // console.log(store);
+    // const aAdd = ()=>{
+    //   store.commit('aCount/add', 1)
+    // };
+    // const bAdd = ()=>{
+    //   store.commit('bCount/add', 1)
+    // };
     return{
       count: computed(()=>store.state.count),
       double: computed(()=>store.getters.double),
@@ -45,8 +47,8 @@ export default {
       bCount: computed(()=>store.state.bCount.count),
       add,
       asyncAdd,
-      aAdd,
-      bAdd
+      // aAdd,
+      // bAdd
     }
   }
 }

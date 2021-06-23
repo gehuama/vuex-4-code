@@ -1,5 +1,6 @@
 import {forEachValue} from "../utils"
 import Module from "./module"
+// 模块收集
 export default class ModuleCollection{
     constructor(rootModule){
         this.root = null
@@ -21,6 +22,33 @@ export default class ModuleCollection{
                 this.register(rawChildModule,path.concat(key));
             })
         }
-        console.log(this.root);
     }
 }
+
+
+// 格式化用户的参数，实现根据自己的需要 后续使用时方便
+// let rootModule={ state,actions,mutations,getters,modules}
+// let root= {
+//     _row:rootModule,
+//     state: rootModule.state,
+//     _children:{
+//         aCount:{
+//             _raw:aModule,
+//             state:aModule.state,
+//             _children:{
+//                 _raw:cModule,
+//                 state:cModule.state,
+//                 _children:{
+                    
+//                 }
+//             }
+//         },
+//         bCount:{
+//             _raw:bsModule,
+//             state:bModule.state,
+//             _children:{}
+//         }
+//     }
+// }
+
+// root.state aCount.state bCount.state

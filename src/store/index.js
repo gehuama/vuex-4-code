@@ -2,51 +2,58 @@ import { createStore } from '@/vuex' // new store() 函数式API
 
 export default createStore({
   state: { // 组件中的data
-    count: 0 
+    count: 0
   },
-  getters:{ // 技术属性 vuex4 他并没有实现计算属性的功能
-    double(state){
+  getters: { // 技术属性 vuex4 他并没有实现计算属性的功能
+    double(state) {
       return state.count * 2
     }
   },
   mutations: { // 可以更改状态 必须是同步更改的
-    add(state, payload){
+    add(state, payload) {
       state.count += payload
     }
   },
   actions: { // 可以调用其他action，或者调用mutations
-    asyncAdd({commit}, payload){
-      setTimeout(()=>{
-        commit("add",payload)
-      },1000)
+    asyncAdd({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        console.log(resolve,reject)
+        setTimeout(() => {
+          commit("add", payload)
+          resolve();
+        }, 1000)
+      })
+      // setTimeout(()=>{
+      //   commit("add",payload)
+      // },1000)
     }
   },
   modules: { // 子模块 实现逻辑拆分
-    aCount:{
-      namespaced : true,
-      state:{count: 1 },
+    aCount: {
+      namespaced: true,
+      state: { count: 1 },
       mutations: { // 可以更改状态 必须是同步更改的
-        add(state, payload){
+        add(state, payload) {
           state.count += payload
         }
       },
-      modules:{
-        cCount:{
-          namespaced : true,
-          state:{count: 1 },
+      modules: {
+        cCount: {
+          namespaced: true,
+          state: { count: 1 },
           mutations: { // 可以更改状态 必须是同步更改的
-            add(state, payload){
+            add(state, payload) {
               state.count += payload
             }
           }
         },
       }
     },
-    bCount:{
-      namespaced : true,
-      state:{count: 2 },
+    bCount: {
+      namespaced: true,
+      state: { count: 2 },
       mutations: { // 可以更改状态 必须是同步更改的
-        add(state, payload){
+        add(state, payload) {
           state.count += payload
         }
       },
