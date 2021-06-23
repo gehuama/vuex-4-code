@@ -1,4 +1,4 @@
-import { createStore } from 'vuex' // new store() 函数式API
+import { createStore } from '@/vuex' // new store() 函数式API
 
 export default createStore({
   state: { // 组件中的data
@@ -30,6 +30,17 @@ export default createStore({
           state.count += payload
         }
       },
+      modules:{
+        cCount:{
+          namespaced : true,
+          state:{count: 1 },
+          mutations: { // 可以更改状态 必须是同步更改的
+            add(state, payload){
+              state.count += payload
+            }
+          }
+        },
+      }
     },
     bCount:{
       namespaced : true,

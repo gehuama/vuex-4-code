@@ -1,49 +1,29 @@
-import { reactive } from "vue"
-import { forEachValue } from "./utils";
+// import { reactive } from "vue"
+// import { forEachValue } from "./utils";
 import { storeKey } from "./inject-key";
+import  ModuleCollection from "./module/module-collection";
+
+function installModule(store,rootState,path,module){ // 递归安装
+    let isRoot = !path.length; // 如果数组是空数组， 说明是根，否则不是
+    if(!isRoot){ // [aCount,cCount]
+        let parentState = path.slice(0,-1).reduce((state,key)=>state[key],rootState);
+        parentState[path[path.length-1]] = module.state;
+    }
+    module.forEachChild((child,key)=>{ // key:aCount bCount
+        installModule(store,rootState,path.concat(key),child)
+    });
+}
+
 export default class Store {
     constructor(options) {
-        console.log(options)
-        // this.a =100; 
-        // vue3 内部会创造一个vue实例，但vuex4直接会采用vue3提供的响应式方法
-        // this.state = options.state;
+        // {state,actions,mutations,getter,modules} // store.modules.aCount.state
         const store = this;
-        // store._store.data 
-        store._state = reactive({ data: options.state }) // new Vue()
-        // vuex 中有个比较重要的API replaceState
-        const _getters = options.getters; // {double: function => getter}
-        store.getters = {};
-        forEachValue(_getters, function (fn, key) {
-            Object.defineProperty(store.getters, key, {
-                get: () => fn(store.state) // computed, 很遗憾，在vuex中vue3.1 不能用computed 实现 如果组件销毁了会移除计算属性，vue3.2会改掉这个bug
-
-            })
-        })
-        // mutation action {add:function} {asyncAdd: function}
-        // commit("add") dispatch("asyncAdd")
-        store._mutations = Object.create(null);
-        store._actions = Object.create(null);
-        const _mutations = options.mutations;
-        const _actions = options.actions;
-        forEachValue(_mutations, (mutations, key) => {
-            store._mutations[key] = (payLoad) => {
-                mutations.call(store, store.state, payLoad);
-            }
-        })
-        forEachValue(_actions, (actions, key) => { //
-            store._actions[key] = (payLoad) => {
-                actions.call(store, store, payLoad);
-            }
-        })
-    }
-    commit = (type, payLoad) => { // bindsss
-        this._mutations[type](payLoad);
-    }
-    dispatch = (type, payload) => {
-        this._actions[type](payload);
-    }
-    get state() { // 类的属性访问器
-        return this._state.data;
+        store._modules = new ModuleCollection(options); // 格式化完modules
+        // 定义状态
+        const state = store._modules.root.state; // 跟状态
+        installModule(state, state,[], store._modules.root) 
+        // 把状态定义到 store.state.aCount.cCount.count
+        console.log(state);
     }
     install(app, injectKey) { // createApp().use(store, 'my')
         // 全局暴露一个变量 暴露的是store的实例
@@ -52,3 +32,30 @@ export default class Store {
         app.config.globalProperties.$store = this; // 增添 $store
     }
 }
+
+// 格式化用户的参数，实现根据自己的需要 后续使用时方便
+// let rootModule={ state,actions,mutations,getters,modules}
+// let root= {
+//     _row:rootModule,
+//     state: rootModule.state,
+//     _children:{
+//         aCount:{
+//             _raw:aModule,
+//             state:aModule.state,
+//             _children:{
+//                 _raw:cModule,
+//                 state:cModule.state,
+//                 _children:{
+                    
+//                 }
+//             }
+//         },
+//         bCount:{
+//             _raw:bsModule,
+//             state:bModule.state,
+//             _children:{}
+//         }
+//     }
+// }
+
+// root.state aCount.state bCount.state

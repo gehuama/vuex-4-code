@@ -19,7 +19,7 @@
 
 <script>
 import {computed} from 'vue';
-import {useStore} from "vuex";
+import {useStore} from "@/vuex";
 export default {
   name: 'App',
   setup(){
@@ -39,9 +39,7 @@ export default {
       store.commit('bCount/add', 1)
     };
     return{
-      count: computed(()=>
-        store.state.count
-      ),
+      count: computed(()=>store.state.count),
       double: computed(()=>store.getters.double),
       aCount: computed(()=>store.state.aCount.count),
       bCount: computed(()=>store.state.bCount.count),
