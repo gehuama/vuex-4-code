@@ -1,6 +1,20 @@
 import { createStore } from '@/vuex' // new store() 函数式API
+function customPlugin (store){
+  let local = localStorage.getItem("VUEX:STATE")
+    if(local){
+      store.replaceState(JSON.parse(local));
+    }
+  store.subscribe((mutation, state)=>{ // 每当状态状态发生变化 （调用了mutation的时候 就会执行此回调）
+    console.log(mutation, state)
+    localStorage.setItem("VUEX:STATE", JSON.stringify(state));
+  })
+  console.log(store)
+}
 
 export default createStore({
+  plugins:[ // 会按照注册的顺序依次执行插件，执行的时候会把store传递给你
+    customPlugin,
+  ],
   strict: true, // 开启严格模式 不用许用户非法操作状态 （只能在mutation中修改状态，否则就会发生异常）
   state: { // 组件中的data
     count: 0

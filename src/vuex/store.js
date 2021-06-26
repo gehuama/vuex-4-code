@@ -64,6 +64,7 @@ function resetStoreState(store, state) {
         enableStrictMode(store);
     }
 }
+// mutation 和 action的区别 ？
 function enableStrictMode(store){
     watch(()=>store._state.data, ()=>{ // 监控数据变化，数据变化后执行回调函数 effect
         // 如果断言为false，则将一个错误消息写入控制台。如果断言是 true，没有任何反应。
@@ -102,7 +103,23 @@ export default class Store {
         // 第三步 给容器添加对应状态
         resetStoreState(store, state);
         // 把状态定义到 store.state.aCount.cCount.count
-        console.log(state);
+        // console.log(state, state);
+        store._subscribes = []
+        options.plugins.forEach((plugin)=>{
+            plugin(store);
+        });
+        
+
+    }
+    subscribe(fn){
+        this._subscribes.push(fn)
+    }
+    replaceState(newState){
+        // 严格模式下 不能直接修改状态
+        this._withCommit(()=>{
+            this._state.data = newState;
+        })
+        
     }
     get state() {
         return this._state.data;
@@ -112,7 +129,9 @@ export default class Store {
         this._withCommit(()=>{
             entry.forEach(handler => handler(payload));
         })
-        
+        this._subscribes.forEach(sub => {
+            sub({type, payload}, this.state)
+        });
     }
     dispatch = (type, payload) => {
         const entry = this._actions[type] || [];
