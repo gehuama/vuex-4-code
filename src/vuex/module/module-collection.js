@@ -8,6 +8,7 @@ export default class ModuleCollection {
     }
     register(rawModule, path) {
         const newModule = new Module(rawModule)
+        // rawModule.newModule = newModule; // 把新的模块 添加到原始对象
         if (path.length === 0) { // 是一个跟模块
             this.root = newModule;
         } else {
@@ -22,6 +23,7 @@ export default class ModuleCollection {
                 this.register(rawChildModule, path.concat(key));
             })
         }
+        return newModule
     }
     getNamespaced(path) {
         let module = this.root; // [a,c] a/c

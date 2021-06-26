@@ -11,7 +11,7 @@ function customPlugin (store){
   console.log(store)
 }
 
-export default createStore({
+const store = createStore({
   plugins:[ // 会按照注册的顺序依次执行插件，执行的时候会把store传递给你
     customPlugin,
   ],
@@ -52,17 +52,17 @@ export default createStore({
           state.count += payload
         }
       },
-      modules: {
-        cCount: {
-          namespaced: true,
-          state: { count: 1 },
-          mutations: { // 可以更改状态 必须是同步更改的
-            add(state, payload) {
-              state.count += payload
-            }
-          }
-        },
-      }
+      // modules: {
+      //   cCount: {
+      //     namespaced: true,
+      //     state: { count: 1 },
+      //     mutations: { // 可以更改状态 必须是同步更改的
+      //       add(state, payload) {
+      //         state.count += payload
+      //       }
+      //     }
+      //   },
+      // }
     },
     bCount: {
       namespaced: true,
@@ -80,3 +80,17 @@ export default createStore({
 // dispatch(action) => commit(mutations) => 修改状态
 
 // 又一个功能 在A页面需要调用一个接口 影响的可能是a数据 B页面也需要调用同一个接口 改的是b数据
+
+store.registerModule(['aCount', 'cCount'], {
+  namespaced: true,
+  state:{
+    count: 0
+  },
+  mutations:{
+    add(state, payLoad){
+      state.count += payLoad;
+    }
+  }
+})
+
+export default store;

@@ -15,7 +15,10 @@ function installModule(store, rootState, path, module) { // 递归安装
     console.log(namespaced)
     if (!isRoot) { // [aCount,cCount]
         let parentState = path.slice(0, -1).reduce((state, key) => state[key], rootState);
-        parentState[path[path.length - 1]] = module.state;
+        store._withCommit(() => {
+            parentState[path[path.length - 1]] = module.state;
+        })
+
     }
     // getters module._raw.getters
     module.forEachGetter((getter, key) => { //{double:function(state){}}
@@ -60,16 +63,16 @@ function resetStoreState(store, state) {
             enumerable: true
         })
     })
-    if(store.strict){
+    if (store.strict) {
         enableStrictMode(store);
     }
 }
 // mutation 和 action的区别 ？
-function enableStrictMode(store){
-    watch(()=>store._state.data, ()=>{ // 监控数据变化，数据变化后执行回调函数 effect
+function enableStrictMode(store) {
+    watch(() => store._state.data, () => { // 监控数据变化，数据变化后执行回调函数 effect
         // 如果断言为false，则将一个错误消息写入控制台。如果断言是 true，没有任何反应。
         console.assert(store._committing, 'do not mutate vuex store state outside mutation handlers');
-    }, {deep:true,flush:'sync'}); // 默认watchApi是异步的，这里改成同步的监控
+    }, { deep: true, flush: 'sync' }); // 默认watchApi是异步的，这里改成同步的监控
 }
 export default class Store {
     _withCommit(fn) { // 切片
@@ -105,32 +108,32 @@ export default class Store {
         // 把状态定义到 store.state.aCount.cCount.count
         // console.log(state, state);
         store._subscribes = []
-        options.plugins.forEach((plugin)=>{
+        options.plugins.forEach((plugin) => {
             plugin(store);
         });
-        
+
 
     }
-    subscribe(fn){
+    subscribe(fn) {
         this._subscribes.push(fn)
     }
-    replaceState(newState){
+    replaceState(newState) {
         // 严格模式下 不能直接修改状态
-        this._withCommit(()=>{
+        this._withCommit(() => {
             this._state.data = newState;
         })
-        
+
     }
     get state() {
         return this._state.data;
     }
     commit = (type, payload) => {
         const entry = this._mutations[type] || [];
-        this._withCommit(()=>{
+        this._withCommit(() => {
             entry.forEach(handler => handler(payload));
         })
         this._subscribes.forEach(sub => {
-            sub({type, payload}, this.state)
+            sub({ type, payload }, this.state)
         });
     }
     dispatch = (type, payload) => {
@@ -142,6 +145,18 @@ export default class Store {
         app.provide(injectKey || storeKey, this); // 给跟app增加一个 _provides,子组件会去向上查找
         // vue.properties.$store = this
         app.config.globalProperties.$store = this; // 增添 $store
+    }
+    registerModule(path, rawModule) { // is aCount/bCount
+        const store = this;
+        if (typeof path == 'string') {
+            path = [path]
+        }
+         // 要在原有的模块基础上新增加一个
+         const newModule = store._modules.register(rawModule, path); // 注册上去
+         // 再把模块安装上
+        installModule(store, store.state, path, newModule)
+         // 重置容器
+        resetStoreState(store, store.state)
     }
 }
 
